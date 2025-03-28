@@ -1,4 +1,4 @@
-package fr.usmb.depocheck;
+package fr.usmb.depocheck.adapters.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
