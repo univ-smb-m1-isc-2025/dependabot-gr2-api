@@ -6,6 +6,7 @@ import fr.usmb.depocheck.Entities.User;
 import fr.usmb.depocheck.Repository.UserRepository;
 import fr.usmb.depocheck.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,5 +49,20 @@ public class AuthController {
         );
         userRepository.save(newUser);
         return "User registered successfully!";
+    }
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        if (jwtUtils.validateJwtToken(token)) {
+            String username = jwtUtils.getUsernameFromToken(token);
+            User user = userRepository.findByUsername(username);
+            if (user != null) {
+                return ResponseEntity.ok(UserDTO.fromEntity(user));
+            } else {
+                return ResponseEntity.status(401).body("Invalid token");
+            }
+        } else {
+            return ResponseEntity.status(401).body("Invalid token");
+        }
     }
 }
