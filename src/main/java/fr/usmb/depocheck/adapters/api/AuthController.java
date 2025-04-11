@@ -1,5 +1,7 @@
 package fr.usmb.depocheck.adapters.api;
 
+import fr.usmb.depocheck.DTO.LoginResponse;
+import fr.usmb.depocheck.DTO.UserDTO;
 import fr.usmb.depocheck.Entities.User;
 import fr.usmb.depocheck.Repository.UserRepository;
 import fr.usmb.depocheck.security.JwtUtil;
@@ -20,8 +22,9 @@ public class AuthController {
     PasswordEncoder encoder;
     @Autowired
     JwtUtil jwtUtils;
+
     @PostMapping("/signin")
-    public String authenticateUser(@RequestBody User user) {
+    public LoginResponse authenticateUser(@RequestBody User user) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getUsername(),
@@ -29,7 +32,7 @@ public class AuthController {
                 )
         );
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtUtils.generateToken(userDetails.getUsername());
+        return new LoginResponse(jwtUtils.generateToken(userDetails.getUsername()), UserDTO.fromEntity(user));
     }
     @PostMapping("/signup")
     public String registerUser(@RequestBody User user) {
@@ -40,6 +43,7 @@ public class AuthController {
         User newUser = new User(
                 null,
                 user.getUsername(),
+                user.getEmail(),
                 encoder.encode(user.getPassword())
         );
         userRepository.save(newUser);

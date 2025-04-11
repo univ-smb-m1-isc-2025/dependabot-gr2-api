@@ -1,5 +1,6 @@
 package fr.usmb.depocheck.Services;
 
+import fr.usmb.depocheck.DTO.UpdateRepoDependencies;
 import fr.usmb.depocheck.Entities.Repository;
 import fr.usmb.depocheck.Entities.User;
 import fr.usmb.depocheck.Objects.DependencieObject;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.Console;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RepositoryService {
@@ -37,8 +38,7 @@ public class RepositoryService {
     }
 
     public List<DependencieObject> checkRepositoryDependencies(Long repoId, Long userId) throws IOException {
-        Repository repository = repositoryRepository.findByIdAndUserId(repoId, userId)
-                .orElseThrow(() -> new RuntimeException("Repository not found"));
+        Repository repository = getRepositoryById(repoId, userId);
 
         switch (repository.getType()) {
             case MAVEN:
@@ -62,23 +62,58 @@ public class RepositoryService {
         repositoryRepository.delete(repository);
     }
 
-    public List<DependencieObject> getRepositoryDependencies(Long repoId, Long userId) throws IOException {
-        Repository repository = repositoryRepository.findByIdAndUserId(repoId, userId)
-                .orElseThrow(() -> new RuntimeException("Repository not found or not owned by user"));
-        System.out.println("Repository found: " + repository.getName());
-        // TODO: get the url and extract the username and repo name from url
+    public  List<UpdateRepoDependencies> getRepositoryDependencies(Long repoId, Long userId) throws IOException {
+        Repository repository = getRepositoryById(repoId, userId);
+
+        String repoUrl = extractGitHubInfoFromURL(repository.getUrl());
+
         switch (repository.getType()) {
             case MAVEN:
-                return mavenService.getDependenciesMaven(
+                List<DependencieObject> deps = mavenService.getDependenciesMaven(
                         repository.getUsername(),
                         repository.getToken(),
-                        repository.getName(),
+                        repoUrl,
                         repository.getBranch()
                 );
+
+                List<UpdateRepoDependencies> updateRepoDependencies = new ArrayList<>();
+
+                for (DependencieObject dep : deps) {
+                    String lastVersion = mavenService.getLastMavenDependencyVersion(dep.getName(), dep.getVersion());
+
+                    updateRepoDependencies.add(new UpdateRepoDependencies(
+                            dep.getName(),
+                            dep.getVersion(),
+                            lastVersion
+                    ));
+                }
+                return updateRepoDependencies;
+
             default:
                 break;
         }
 
         return null;
+    }
+
+    private String extractGitHubInfoFromURL(String url) {
+        if (url == null || url.isEmpty()) {
+            throw new IllegalArgumentException("Depot URL can't be null or empty");
+        }
+
+        String path = url.replaceFirst("https?://github\\.com/", "");
+
+        String[] segments = path.split("/");
+
+        if (segments.length < 2) {
+            throw new IllegalArgumentException("Invalid github URL format: " + url);
+        }
+
+        return path;
+    }
+
+    public Repository getRepositoryById(Long id, Long userId) {
+        return repositoryRepository.findByIdAndUserId(id, userId)
+                .orElseThrow(() -> new RuntimeException("Repository not found or not owned by user"));
     }
 }

@@ -5,14 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateRepoDependenciesList {
-    private String response;
-    private RepositoryDTO repository;
-    private List<UpdateRepoDependencies> dependencies;
+public class LoginResponse {
+    private String token;
+    private UserDTO user;
 }

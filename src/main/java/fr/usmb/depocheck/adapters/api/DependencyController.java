@@ -129,9 +129,14 @@ public class DependencyController {
             String token = authHeader.replace("Bearer ", "");
             Long userId = getUserIdFromToken(token);
 
-            List<DependencieObject> dependencies = repositoryService.getRepositoryDependencies(id, userId);
+            List<UpdateRepoDependencies> dependencies = repositoryService.getRepositoryDependencies(id, userId);
+            if (dependencies == null) {
+                return ResponseEntity.badRequest().body("Error: Repository not found or not owned by user");
+            }
+            // Create a new RepositoryDTO object
+            Repository repository = repositoryService.getRepositoryById(id, userId);
 
-            return ResponseEntity.ok(new ResponseDependecyRequest("Dependencies retrieved", dependencies));
+            return ResponseEntity.ok(new UpdateRepoDependenciesList("Dependencies retrieved", RepositoryDTO.fromEntity(repository), dependencies));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
