@@ -102,6 +102,20 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Github API -->
+		<dependency>
+			<groupId>org.kohsuke</groupId>
+			<artifactId>github-api</artifactId>
+			<version>1.327</version>
+		</dependency>
+
+		<!-- Maven model -->
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-model</artifactId>
+			<version>3.9.9</version>
+		</dependency>
+
 	</dependencies>
 
 
