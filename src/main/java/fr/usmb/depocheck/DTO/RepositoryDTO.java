@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,8 @@ public class RepositoryDTO {
     private String branch;
     private String username;
     private RepoType type;
+    private LocalDateTime lastVerificationDate;
+    private Integer pendingUpdatesCount;
 
     // Convert Entity to DTO
     public static RepositoryDTO fromEntity(Repository repository) {
@@ -31,6 +34,8 @@ public class RepositoryDTO {
         dto.setBranch(repository.getBranch());
         dto.setUsername(repository.getUsername());
         dto.setType(repository.getType());
+        dto.setLastVerificationDate(repository.getLastVerificationDate());
+        dto.setPendingUpdatesCount(repository.getPendingUpdatesCount());
         return dto;
     }
 

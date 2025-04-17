@@ -9,6 +9,7 @@ import fr.usmb.depocheck.Repository.UserRepository;
 import fr.usmb.depocheck.RepoType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 
 import java.io.Console;
 import java.io.IOException;
@@ -62,10 +63,11 @@ public class RepositoryService {
         repositoryRepository.delete(repository);
     }
 
-    public  List<UpdateRepoDependencies> getRepositoryDependencies(Long repoId, Long userId) throws IOException {
+    public List<UpdateRepoDependencies> getRepositoryDependencies(Long repoId, Long userId) throws IOException {
         Repository repository = getRepositoryById(repoId, userId);
-
         String repoUrl = extractGitHubInfoFromURL(repository.getUrl());
+
+        List<UpdateRepoDependencies> updateRepoDependencies = new ArrayList<>();
 
         switch (repository.getType()) {
             case MAVEN:
@@ -76,17 +78,23 @@ public class RepositoryService {
                         repository.getBranch()
                 );
 
-                List<UpdateRepoDependencies> updateRepoDependencies = new ArrayList<>();
-
                 for (DependencieObject dep : deps) {
                     String lastVersion = mavenService.getLastMavenDependencyVersion(dep.getName(), dep.getVersion());
 
-                    updateRepoDependencies.add(new UpdateRepoDependencies(
-                            dep.getName(),
-                            dep.getVersion(),
-                            lastVersion
-                    ));
+                    if (!lastVersion.equals(dep.getVersion())) {
+                        updateRepoDependencies.add(new UpdateRepoDependencies(
+                                dep.getName(),
+                                dep.getVersion(),
+                                lastVersion
+                        ));
+                    }
                 }
+
+                // Update the repository with the new verification date and pending updates count
+                repository.setLastVerificationDate(LocalDateTime.now());
+                repository.setPendingUpdatesCount(updateRepoDependencies.size());
+                repositoryRepository.save(repository);
+
                 return updateRepoDependencies;
 
             default:

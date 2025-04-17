@@ -4,6 +4,8 @@ import fr.usmb.depocheck.RepoType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "repositories")
 @Getter
@@ -24,6 +26,12 @@ public class Repository {
     private RepoType type;
 
     private String token;
+
+    @Column(name = "last_verification_date")
+    private LocalDateTime lastVerificationDate;
+
+    @Column(name = "pending_updates_count")
+    private Integer pendingUpdatesCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
