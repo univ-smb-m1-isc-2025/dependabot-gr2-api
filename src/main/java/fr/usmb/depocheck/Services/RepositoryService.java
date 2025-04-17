@@ -67,6 +67,8 @@ public class RepositoryService {
         Repository repository = getRepositoryById(repoId, userId);
         String repoUrl = extractGitHubInfoFromURL(repository.getUrl());
 
+        int updateCount = 0;
+
         List<UpdateRepoDependencies> updateRepoDependencies = new ArrayList<>();
 
         switch (repository.getType()) {
@@ -82,17 +84,19 @@ public class RepositoryService {
                     String lastVersion = mavenService.getLastMavenDependencyVersion(dep.getName(), dep.getVersion());
 
                     if (!lastVersion.equals(dep.getVersion())) {
-                        updateRepoDependencies.add(new UpdateRepoDependencies(
-                                dep.getName(),
-                                dep.getVersion(),
-                                lastVersion
-                        ));
+                        updateCount++;
                     }
+                    updateRepoDependencies.add(new UpdateRepoDependencies(
+                            dep.getName(),
+                            dep.getVersion(),
+                            lastVersion
+                    ));
                 }
 
                 // Update the repository with the new verification date and pending updates count
                 repository.setLastVerificationDate(LocalDateTime.now());
-                repository.setPendingUpdatesCount(updateRepoDependencies.size());
+                repository.setPendingUpdatesCount(updateCount);
+                repository.setNumberOfDependencies(updateRepoDependencies.size());
                 repositoryRepository.save(repository);
 
                 return updateRepoDependencies;

@@ -24,6 +24,7 @@ public class RepositoryDTO {
     private RepoType type;
     private LocalDateTime lastVerificationDate;
     private Integer pendingUpdatesCount;
+    private Integer numberOfDependencies;
 
     // Convert Entity to DTO
     public static RepositoryDTO fromEntity(Repository repository) {
@@ -36,6 +37,7 @@ public class RepositoryDTO {
         dto.setType(repository.getType());
         dto.setLastVerificationDate(repository.getLastVerificationDate());
         dto.setPendingUpdatesCount(repository.getPendingUpdatesCount());
+        dto.setNumberOfDependencies(repository.getNumberOfDependencies());
         return dto;
     }
 

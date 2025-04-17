@@ -33,6 +33,9 @@ public class Repository {
     @Column(name = "pending_updates_count")
     private Integer pendingUpdatesCount;
 
+    @Column(name = "number_of_dependencies")
+    private Integer numberOfDependencies;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
